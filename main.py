@@ -1,5 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import pygame 
+from training import make_prediction
 
 # settings 
 grid_size = 28           #   28x28 Grid 
@@ -18,7 +20,7 @@ def main():
     matrix = np.zeros([grid_size, grid_size], dtype='float32') # matrix with indizes 
 
     prev_idx, prev_idy = -1, -1         # to check if mouse left the canvas
-    key_pressed = False                 # to click on key only once
+    key_already_pressed = False                 # to click on key only once
     mouse_press_prev = False 
 
     while True: 
@@ -44,21 +46,28 @@ def main():
             else:
                 mouse_press_prev = False
 
-        if keys[pygame.K_p] and not key_pressed:
-            pass
-        if keys[pygame.K_c]:
+        if keys[pygame.K_p]:
+            if not key_already_pressed:
+                make_prediction(np.transpose(matrix))
+                key_already_pressed = True
+        else:
+            key_already_pressed = False
+
+        if keys[pygame.K_r]:
             matrix = np.zeros([grid_size, grid_size], dtype='float32') # matrix with indizes 
+        if keys[pygame.K_s]:
+            print(matrix)
+            plt.imshow(np.transpose(matrix))
+            plt.show()
 
         prev_idx, prev_idy = idx, idy
         draw_num_on_screen(screen, matrix)
-        # guess number 
 
         make_grid(screen, grid_size)
 
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(120)
 
-            
 
 def get_square_size():
     width_screen = pygame.display.Info().current_w
@@ -70,14 +79,13 @@ def get_square_size():
 
 def make_grid(screen, grid_size):  
     square_size = get_square_size()
-    # draw of the grid
     grid_thickness = 1
     for i in range(grid_size+1):
         pygame.draw.rect(screen, GRAY, (i*square_size - grid_thickness, 0, 2*grid_thickness, square_size*grid_size))
         pygame.draw.rect(screen, GRAY, (0, i*square_size - grid_thickness, square_size*grid_size, 2*grid_thickness))
 
     # Display message under the grid
-    textsurface = myfont.render('Press <c> to clear, Press <p> to predict', False, RED)
+    textsurface = myfont.render('Press <r> to reset, Press <p> to predict', False, RED)
     screen.blit(textsurface,(0, (grid_size)*square_size))
 
 
@@ -101,11 +109,6 @@ def draw_num_on_screen(screen, matrix):
             pygame.draw.rect(screen, col, (i*square_size, j*square_size, square_size, square_size))
 
 
-def print_matrix(matrix):
-    print(matrix)
-    print('#################################################')
-            
-
 def draw_number(screen, idx, idy):
     square_size = get_square_size()
     pygame.draw.rect(screen, RED, (idx*square_size, idy*square_size, square_size, square_size)) 
@@ -116,7 +119,6 @@ def get_cell_index():
     square_size = get_square_size()
     idx, idy = int(mx / square_size), int(my / square_size)
     return [idx, idy]
-
 
 if __name__ == '__main__':
     main()
