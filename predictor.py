@@ -27,7 +27,7 @@ class Predictor(nn.Module):
         out = self(image)
         out = F.softmax(out[0], dim=0)
         cert, number = torch.max(out, dim=0)
-        print(f'Prediction: {int(number.numpy())}, Certainty: {cert.detach().numpy()*100} %')
+        print(f'Prediction: {int(number.numpy())}, Certainty: {round(cert.detach().numpy()*100,2)}, 2 %')
 
     def training_step(self, batch):
         images, labels = batch
